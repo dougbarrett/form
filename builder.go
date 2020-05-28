@@ -50,6 +50,7 @@ import (
 // be used to parse forms that are created by the Builder.
 type Builder struct {
 	InputTemplate *template.Template
+	TagName       string
 }
 
 // Inputs will parse the provided struct into fields and then execute the
@@ -82,7 +83,7 @@ func (b *Builder) Inputs(v interface{}, errs ...error) (template.HTML, error) {
 	if err != nil {
 		return "", err
 	}
-	fields := fields(v)
+	fields := b.fields(v)
 	errors := fieldErrors(errs)
 	var html template.HTML
 	for _, field := range fields {

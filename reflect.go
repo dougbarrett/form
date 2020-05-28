@@ -27,7 +27,7 @@ func valueOf(v interface{}) reflect.Value {
 	return rv
 }
 
-func fields(v interface{}, names ...string) []field {
+func (b *Builder) fields(v interface{}, names ...string) []field {
 	rv := valueOf(v)
 	if rv.Kind() != reflect.Struct {
 		// We can't really do much with a non-struct type. I suppose this
@@ -52,7 +52,7 @@ func fields(v interface{}, names ...string) []field {
 		// to provide the name of this struct field to be added as a prefix
 		// to the fields.
 		if rf.Kind() == reflect.Struct {
-			ret = append(ret, fields(rf.Interface(), append(names, t.Field(i).Name)...)...)
+			ret = append(ret, b.fields(rf.Interface(), append(names, t.Field(i).Name)...)...)
 			continue
 		}
 
@@ -60,7 +60,12 @@ func fields(v interface{}, names ...string) []field {
 		// struct and need to add the field. First we check to see if the
 		// ignore tag is present, then we set default values, then finally
 		// we overwrite defaults with any provided tags.
-		tags := parseTags(t.Field(i).Tag.Get("form"))
+		tagName := b.TagName
+
+		if tagName == "" {
+			tagName = "form"
+		}
+		tags := parseTags(t.Field(i).Tag.Get(tagName))
 		if _, ok := tags["-"]; ok {
 			continue
 		}
